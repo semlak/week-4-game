@@ -1,0 +1,91 @@
+#game-container {
+	/*margin: 120px auto;*/
+	margin: 130px auto;
+	/*margin: 40px auto;*/
+	border: 3px solid #ddd;
+	padding: 40px;
+	height: 600px;
+	/*width: 960px!important;*/
+	/*max-height: 700px;*/
+}
+
+
+.active-game {
+	/*visibility: hidden;*/
+	/*display: none;*/
+	margin-top: 20px;
+}
+
+
+#guessed-letters {
+	letter-spacing: 0.1em;
+}
+
+#wins-count {
+	border: 2px solid #ddd;
+	border-radius: 5px;
+}
+
+.wins-count-updating {
+	border: 4px solid #9932CC!important;
+}
+
+
+#character-quote {
+	color: #888;
+	padding: 1em;
+}
+
+.card-blockquote {
+	font-style: italic;
+
+}
+
+
+.underline {
+	border-bottom: 3px solid #555;
+}
+
+
+/*  styling for div holding hangman word */
+
+
+
+.word-div span {
+	width: 5px;
+	text-align: center;
+	margin: 10px 5px;
+	padding: 0 5px;
+	font-family: 'Lucida Console', Monaco, monospace
+}
+
+
+/*  help with fading in bootstrap alerts from https://stackoverflow.com/questions/7676356/can-twitter-bootstrap-alerts-fade-in-as-well-as-out*/
+.fade {
+  opacity: 0;
+  -webkit-transition: opacity 0.45s linear;
+  -moz-transition: opacity 0.45s linear;
+  -o-transition: opacity 0.45s linear;
+  transition: opacity 0.45s linear;
+}
+
+.fade.in {
+  opacity: 1;
+}
+
+
+#app-status .card-body {
+	margin-top: -30px;
+	margin-bottom: -10px;
+}
+
+
+.modal-footer {
+	justify-content: center;
+}
+
+
+.card-body p {
+	/*position: absolute;*/
+	/*bottom: 30;*/
+}
