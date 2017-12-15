@@ -19,7 +19,7 @@ const EventEnum = {
 
 const initialHPRange = [50, 300];
 const initialAPRange = [5, 30];
-const counterAPRange = [5, 50]
+const counterAPRange = [5, 50];
 
 const orders = [
 	[0, 1, 2],
@@ -148,7 +148,7 @@ let RPGGame = class {
 		}
 
 		this.gameCharacters = [];
-		this.gameCharacterNameToIndexMap = {};
+		this.gameCharacterIdToIndexMap = {};
 		this.gameCharacters.forEach((charObj, i) => {
 			console.log(charObj, i);
 			this.gameCharacterNameToIndexMap[charObj._id] = i
@@ -157,6 +157,11 @@ let RPGGame = class {
 		this.addEventListeners();
 
 		this.startGame();
+		this.winningSet = [];
+		this.gameMessageModalData = {
+			header: "A Star Wars RPG  Game",
+			body: "Thank you for playing!"
+		};
 	}
 
 	resetCurrentGame() {
@@ -371,14 +376,30 @@ let RPGGame = class {
 		let humanCharacter = this.gameCharacters[this.humanPlayerCharacterIndex];
 		let opponent = this.gameCharacters[this.currentOpponentIndex];
 		humanCharacter.attackWithCharacter(opponent);
+		let me = this;
 
 		if (humanCharacter.isDefeated()) {
 			$("body").trigger(EventEnum.GAMELOSE);
+			// show modal with message that playerr has lossed.
+			// $('#myModal').on('shown.bs.modal', function() {
+			let modal = $('#gameMessageModal');
+			me.gameMessageModalData.header = "Game over";
+			me.gameMessageModalData.body = "Sorry. You lost. You can reset the game to play with the same character values, or start a new game which will reset character values."
+			$("#messageModalLabel").text(me.gameMessageModalData.header)
+			$("#messageModalBody").text(me.gameMessageModalData.body)
+			$('#gameMessageModal').modal('show');
+			// })
 		}
 		else if (opponent.isDefeated()) {
 			// if there are no opponents  left, player has won the whole game. Otherwise, player has just won this battle
 			if ($("#character-deck .character-card").length === 0) {
 				$("body").trigger(EventEnum.GAMEWIN);
+				let modal = $('#gameMessageModal');
+				me.gameMessageModalData.header = "You won!";
+				me.gameMessageModalData.body = "Amazing! You won! The force must be with you.\n\nYou can still reset the game to play with the same character values, or start a new game which will reset character values."
+				$("#messageModalLabel").text(me.gameMessageModalData.header)
+				$("#messageModalBody").text(me.gameMessageModalData.body)
+				$('#gameMessageModal').modal('show');
 			}
 			$("body").trigger(EventEnum.ATTACKWIN);
 		}
@@ -413,7 +434,7 @@ let RPGGame = class {
 
 		$("body").on(EventEnum.GAMELOSE, function(e) {
 			// me.startGame();
-			window.alert("Sorry. You lossed");
+			// window.alert("Sorry. You lossed");
 			// me.updateScreen();
 			$("#attack-button").prop('disabled', true);
 			$("#attack-button").attr('aria-disabled', true);
@@ -504,7 +525,11 @@ let RPGGame = class {
 
 
 	checkForWinAndLoss(player, opponents) {
-		let results = [];
+		// this function only checks that the single character (input as player) has both a winning and losing path.
+		// While doing so, it is able to adjust the player's initialAP, because this does not affect how it behaves as an opponent
+		// results stores the player's  health at the end of each iteration of opponent order.
+		// a value  in the  results
+		let playerHealthResults = [];
 		orders.forEach(function(order) {
 			let playerHealth = player.initialHP;
 			let playerAP = player.initialAP;
@@ -517,8 +542,12 @@ let RPGGame = class {
 				let attacksNeeded = 0;
 				let opponentHeath = opponent.initialHP;
 				let orderFailed = false;
-				while (opponentHeath > 0) {
-					// console.log(player.name, "playerHealth: ", playerHealth, "against", opponent.name)
+				let whileLoopLimit = 100;
+				let counter = 0;
+				while (opponentHeath > 0 && counter < whileLoopLimit) {
+					// this works sort like a binary search to find  initialAP that will work let the character win.
+					// however, there is an error in the logic that allows it to run indefinitely, and so I have imposed a whileLoopLimit
+					// console.log("in checkForWinAndLoss", player.name, "playerHealth: ", playerHealth, "against", opponent.name)
 					opponentHeath -= playerAP;
 					if (opponentHeath > 0) {
 						playerHealth -= opponent.counterAP;
@@ -530,25 +559,31 @@ let RPGGame = class {
 					if (playerHealth < 1) {
 						// return false;
 						// orderFailed = true;
-						// results.push(false);
+						// playerHealthResults.push(false);
 					}
+					counter++;
+				}
+				if (counter >= whileLoopLimit) {
+					console.log("\n\n\n\nFailed to find winning path for character\n\n\n");
+					return 0;
 				}
 				// console.log(opponent.name, attacksNeeded);
 
 				// console.log()
-				// results.push(orderFailed);
+				// playerHealthResults.push(orderFailed);
 
 				//return true;
 
 			})
-			results.push(playerHealth > 0);
+			playerHealthResults.push(playerHealth > 0);
 			// console.log(playerHealth > 0)
 		})
 		// console.log(player.name, ":", order.map(i => opponents[i].name));
-		// console.log(player.name, ":", results, "\n\n")
+		// console.log(player.name, ":", playerHealthResults, "\n\n")
 		// return "hey";
-		let winCount = results.filter(result => result).length;
-		// return (results.filter(result => result). && results.filter(result => !result));
+
+		let winCount = playerHealthResults.filter(result => result).length;
+		// return (playerHealthResults.filter(result => result). && playerHealthResults.filter(result => !result));
 		return winCount;
 		// // return (winCount > 0 && winCount < 5);
 		// if (winCount < 1) {
@@ -571,9 +606,9 @@ let RPGGame = class {
 			let foundSolution = false;
 			let player = characters[j];
 			let opponents = characters.filter((character, k) => k !== j);
-			console.log(opponents.map(opponent => opponent.initialHP));
-			let maxOpponentHealth = opponents.map(opponent => opponent.initialHP).reduce((a, b) => Math.max(a, b));
-			let minOpponentHealth = opponents.map(opponent => opponent.initialHP).reduce((a, b) => Math.min(a, b));
+			// console.log(opponents.map(opponent => opponent.initialHP));
+			// let maxOpponentHealth = opponents.map(opponent => opponent.initialHP).reduce((a, b) => Math.max(a, b));
+			// let minOpponentHealth = opponents.map(opponent => opponent.initialHP).reduce((a, b) => Math.min(a, b));
 			// let minOpponentHealth = Math.min(opponents.map(opponent => opponent.initialHP));
 			// console.log(maxOpponentHealth, minOpponentHealth);
 			// console.log(opponents);
@@ -582,11 +617,12 @@ let RPGGame = class {
 			let changeInInitialAP = 2
 			// player.initialAP = minOpponentHealth + changeInInitialAP;
 			for (let i = 0; i < 10; i++) {
+				console.log("looping in checkCharacterSetForWinAndLossPaths trying to find character's initialAP, for character", player.name);
 				let winCheck = this.checkForWinAndLoss(player, opponents);
 				// console.log("Character", player.name, " number of Wins", winCheck, "initialAP", player.initialAP);
 
 				if (winCheck > 0 && winCheck < 6) {
-					console.log("Character", player.name, " wins with initialAP", player.initialAP);
+					// console.log("Character", player.name, " wins with initialAP", player.initialAP);
 					i = 10;
 					foundSolution = true;
 					// return true;
@@ -638,6 +674,7 @@ let RPGGame = class {
 	generateNewPlayerSet(characters) {
 		let me = this;
 		for (let i = 0; i < 5; i++) {
+			console.log("looping in generateNewPlayerSet trying to generate a new character set");
 			characters.forEach(function(player) {
 				player.initialHP = randomNumberFromRangeArray(initialHPRange);
 				player.initialAP = randomNumberFromRangeArray(initialAPRange);
