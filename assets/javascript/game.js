@@ -16,6 +16,30 @@ const EventEnum = {
 
 
 
+// Built by LucyBot. www.lucybot.com
+var url = "https://api.smtp2go.com/v3/email/send";
+$.ajax({
+  url: url,
+  method: 'POST',
+  headers: {
+    'Content-Type': "application/json"
+  },
+  data: JSON.stringify({
+    'sender': "\"jsemlak@yahoo.com\"",
+    'subject': "Hey",
+    'html_body': "",
+    'text_body': "What's up",
+    'to': [
+      "semlak@gmail.com"
+    ]
+  }),
+}).done(function(result) {
+  console.log(result);
+}).fail(function(err) {
+  throw err;
+});
+// Send Requ
+
 
 const initialHPRange = [50, 300];
 const initialAPRange = [5, 30];
@@ -326,11 +350,11 @@ let RPGGame = class {
 
 		let charObj = this.gameCharacters[this.currentOpponentIndex];
 		let characterCard = $("#" + charObj._id);
-		console.log(charObj, characterCard);
+		// console.log(charObj, characterCard);
 
 		let cardWidth = characterCard.width();
 		let oldMarginWidth = Number.parseInt(characterCard.css("margin-left").replace(/px/, ""));
-		console.log("oldMarginWidth", oldMarginWidth);
+		// console.log("oldMarginWidth", oldMarginWidth);
 
 		characterCard.animate({
 			opacity: 0
@@ -492,8 +516,8 @@ let RPGGame = class {
 		let me = this;
 
 		$(".character-card").on("click", function() {
-			console.log("character clicked")
-			console.log("humanPlayerSet", me.humanPlayerSet, ", opponentSet: ", me.opponentSet);
+			// console.log("character clicked")
+			// console.log("humanPlayerSet", me.humanPlayerSet, ", opponentSet: ", me.opponentSet);
 			if (me.humanPlayerSet === false) {
 				console.log((this.id));
 				// let charIndex = Number.parseInt($(this)[0].valueOf().attributes[2].value);
@@ -506,7 +530,7 @@ let RPGGame = class {
 				me.humanPlayerSet = true;
 			}
 			else if (me.opponentSet === false) {
-				console.log("The player selected character as opponent")
+				// console.log("The player selected character as opponent")
 				// set opponent index
 				// let charIndex = Number.parseInt($(this)[0].valueOf().attributes[2].value);
 				let charIndex = me.gameCharacters.findIndex(charObj => charObj._id === this.id)
@@ -617,7 +641,7 @@ let RPGGame = class {
 			let changeInInitialAP = 2
 			// player.initialAP = minOpponentHealth + changeInInitialAP;
 			for (let i = 0; i < 10; i++) {
-				console.log("looping in checkCharacterSetForWinAndLossPaths trying to find character's initialAP, for character", player.name);
+				// console.log("looping in checkCharacterSetForWinAndLossPaths trying to find character's initialAP, for character", player.name);
 				let winCheck = this.checkForWinAndLoss(player, opponents);
 				// console.log("Character", player.name, " number of Wins", winCheck, "initialAP", player.initialAP);
 
